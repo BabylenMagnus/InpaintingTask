@@ -1,0 +1,8 @@
+data
+.ipynb_checkpoints
+.obsidian
+.idea
+*.jpg
+*.zip
+*.ipynb
+weights
