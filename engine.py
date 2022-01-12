@@ -18,7 +18,6 @@ def train_one_epoch(
 
         batch_size = len(imgs)
         inp_tensor = torch.cat((imgs, masks), dim=1).cuda()
-
         # generator forward
         gen_img = generator(inp_tensor)
 

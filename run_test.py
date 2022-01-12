@@ -8,6 +8,7 @@ import torch
 from torchvision.transforms import functional as F
 
 from engine import get_generator
+from constant import dark_threshold
 
 
 parser = ArgumentParser()
@@ -26,11 +27,12 @@ for i in os.listdir(args.test_folder_path):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = cv2.resize(img, (256, 256))
 
-    mask = img == [0, 0, 0]
+    mask = np.logical_and(
+        img[:, :, 0] < dark_threshold, img[:, :, 1] < dark_threshold, img[:, :, 2] < dark_threshold
+    ).astype(int)
+
     mask = F.to_tensor(mask)
-    mask = mask[0]
-    mask = mask.unsqueeze(0)
-    mask = mask.to(torch.float32)
+    # mask = mask.to(torch.float32)
 
     img = F.to_tensor(img)
 

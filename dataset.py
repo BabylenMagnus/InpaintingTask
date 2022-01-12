@@ -3,8 +3,9 @@ import cv2
 
 from torch.utils.data import Dataset
 from torchvision.transforms import functional as F
-import torch
+
 import numpy as np
+from constant import dark_threshold
 
 
 class InpaitingDataset(Dataset):
@@ -30,14 +31,12 @@ class InpaitingDataset(Dataset):
 
         img = cv2.imread(path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, (256, 256))
+        img = cv2.resize(img, self.image_size)
 
-        mask = img == [0, 0, 0]
+        mask = np.logical_and(
+            img[:, :, 0] < dark_threshold, img[:, :, 1] < dark_threshold, img[:, :, 2] < dark_threshold
+        ).astype(int)
         mask = F.to_tensor(mask)
-        mask = mask[0]
-        mask = mask.unsqueeze(0)
-        mask = mask.to(torch.float32)
-
         img = F.to_tensor(img)
 
         path_target = os.path.join(self.root, name.replace('x', 'y'))
