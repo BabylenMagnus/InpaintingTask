@@ -40,7 +40,9 @@ def train_one_epoch(
 
     all_gen_loss, all_dis_loss = 0, 0
 
-    for _, (imgs, targets, masks) in enumerate(dataloader):
+    mse_loss = torch.nn.MSELoss()
+
+    for i, (imgs, targets, masks) in enumerate(dataloader):
         optim_gen.zero_grad()
         targets = targets.cuda()
         inp_tensor = torch.cat((imgs, masks), dim=1).cuda()
@@ -64,19 +66,20 @@ def train_one_epoch(
 
         all_dis_loss += d_loss.cpu().item()
 
-        # -----------------
-        #  Train Generator
-        # -----------------
-        optim_gen.zero_grad()
+        if not i % steps_generator_train:
+            # -----------------
+            #  Train Generator
+            # -----------------
+            optim_gen.zero_grad()
 
-        gen_img = generator(inp_tensor)
-        fake_validity = discriminator(gen_img).reshape(-1)
-        g_loss = -torch.mean(fake_validity)
+            gen_img = generator(inp_tensor)
+            fake_validity = discriminator(gen_img).reshape(-1)
+            g_loss = -torch.mean(fake_validity) + mse_loss(gen_img, targets) * mse_alpha
 
-        g_loss.backward()
-        optim_gen.step()
+            g_loss.backward()
+            optim_gen.step()
 
-        all_gen_loss += g_loss.cpu().item()
+            all_gen_loss += g_loss.cpu().item()
 
     all_gen_loss /= len(dataloader)
     all_dis_loss /= len(dataloader)
