@@ -79,7 +79,8 @@ class UpLayer(torch.nn.Module):
 
     def forward(self, input):
         x = F.interpolate(input, scale_factor=2)
-        return self.conv2d(x)
+        x = self.conv2d(x)
+        return x
 
 
 class InpaitingModel(nn.Module):

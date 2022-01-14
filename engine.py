@@ -4,8 +4,36 @@ from model import InpaitingModel, InpaintingDiscriminator
 from constant import *
 
 
+def compute_gp(netD, real_data, fake_data):
+    batch_size = real_data.size(0)
+    # Sample Epsilon from uniform distribution
+    eps = torch.rand(batch_size, 1, 1, 1).to(real_data.device)
+    eps = eps.expand_as(real_data)
+
+    # Interpolation between real data and fake data.
+    interpolation = eps * real_data + (1 - eps) * fake_data
+
+    # get logits for interpolated images
+    interp_logits = netD(interpolation)
+    grad_outputs = torch.ones_like(interp_logits)
+
+    # Compute Gradients
+    gradients = torch.autograd.grad(
+        outputs=interp_logits,
+        inputs=interpolation,
+        grad_outputs=grad_outputs,
+        create_graph=True,
+        retain_graph=True,
+    )[0]
+
+    # Compute and return Gradient Norm
+    gradients = gradients.view(batch_size, -1)
+    grad_norm = gradients.norm(2, 1)
+    return torch.mean((grad_norm - 1) ** 2)
+
+
 def train_one_epoch(
-        generator, discriminator, gen_loss_func, dis_loss_func, optim_gen, optim_dis, dataloader, train_generator=False
+        generator, discriminator, optim_gen, optim_dis, dataloader
 ):
     generator.train()
     discriminator.train()
@@ -14,43 +42,41 @@ def train_one_epoch(
 
     for _, (imgs, targets, masks) in enumerate(dataloader):
         optim_gen.zero_grad()
-        optim_dis.zero_grad()
-
-        batch_size = len(imgs)
+        targets = targets.cuda()
         inp_tensor = torch.cat((imgs, masks), dim=1).cuda()
-        # generator forward
+
+        # ---------------------
+        #  Train Discriminator
+        # ---------------------
+        optim_dis.zero_grad()
         gen_img = generator(inp_tensor)
 
-        # discriminator forward
-        batch_data = torch.cat([targets.cuda(), gen_img.detach()], dim=0)
-        batch_output = discriminator(batch_data)
-        real_pred, fake_pred = torch.split(batch_output, batch_size, dim=0)
+        real_validity = discriminator(targets).reshape(-1)
+        fake_validity = discriminator(gen_img).reshape(-1)
 
-        # discriminator loss
-        zero_classes = torch.zeros_like(fake_pred).cuda()
-        ones_classes = torch.ones_like(real_pred).cuda()
-        dis_loss = dis_loss_func(fake_pred, zero_classes) + dis_loss_func(real_pred, ones_classes)
+        # Gradient Penalty
+        gp = compute_gp(discriminator, targets, gen_img)
 
-        dis_loss.backward()
+        # Wasserstein loss with penalty
+        d_loss = torch.mean(fake_validity) - torch.mean(real_validity) + penalty_lambda * gp
+        d_loss.backward()
         optim_dis.step()
 
-        all_dis_loss += dis_loss.cpu().item()
+        all_dis_loss += d_loss.cpu().item()
 
-        # generator loss
-        if train_generator:
-            targets = targets.cuda()
-            masks = masks.cuda()
+        # -----------------
+        #  Train Generator
+        # -----------------
+        optim_gen.zero_grad()
 
-            fake_pred = discriminator(gen_img)
-            gen_loss = \
-                gen_loss_func(targets, gen_img) \
-                + (1 - torch.mean(fake_pred)) * alpha \
-                + gen_loss_func(targets * masks, gen_img * masks) * mask_alpha
+        gen_img = generator(inp_tensor)
+        fake_validity = discriminator(gen_img).reshape(-1)
+        g_loss = -torch.mean(fake_validity)
 
-            gen_loss.backward()
-            optim_gen.step()
+        g_loss.backward()
+        optim_gen.step()
 
-            all_gen_loss += gen_loss.cpu().item()
+        all_gen_loss += g_loss.cpu().item()
 
     all_gen_loss /= len(dataloader)
     all_dis_loss /= len(dataloader)
@@ -60,7 +86,7 @@ def train_one_epoch(
 
 def get_generator():
     weights = sorted(os.listdir("weights"))
-    weights = list(filter(lambda x: x.startswith("gen"), weights))
+    weights = list(filter(lambda x: x.startswith("wgen"), weights))
 
     generator = InpaitingModel().cuda()
 
@@ -72,7 +98,7 @@ def get_generator():
 
 def get_discriminator():
     weights = sorted(os.listdir("weights"))
-    weights = list(filter(lambda x: x.startswith("dis"), weights))
+    weights = list(filter(lambda x: x.startswith("wdis"), weights))
 
     discriminator = InpaintingDiscriminator().cuda()
 

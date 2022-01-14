@@ -2,7 +2,6 @@ import os
 from argparse import ArgumentParser
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torchvision.transforms import functional as F
@@ -49,4 +48,8 @@ for i in os.listdir(args.test_folder_path):
     img[img < 0] = 0
     img[img > 1] = 1
 
-    plt.imsave(os.path.join(args.output_folder_path, i), img)
+    img *= 256
+    img = np.int16(img)
+    img = img[:, :, [2, 1, 0]]
+
+    cv2.imwrite(os.path.join(args.output_folder_path, i), img)
