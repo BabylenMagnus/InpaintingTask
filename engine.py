@@ -43,7 +43,6 @@ def train_one_epoch(
     mse_loss = torch.nn.MSELoss()
 
     for i, (imgs, targets, masks) in enumerate(dataloader):
-        optim_gen.zero_grad()
         targets = targets.cuda()
         inp_tensor = torch.cat((imgs, masks), dim=1).cuda()
 
