@@ -63,7 +63,7 @@ def train_one_epoch(
         d_loss.backward()
         optim_dis.step()
 
-        all_dis_loss += d_loss.cpu().item()
+        all_dis_loss += d_loss.detach().cpu().item()
 
         if not i % steps_generator_train:
             # -----------------
@@ -78,7 +78,7 @@ def train_one_epoch(
             g_loss.backward()
             optim_gen.step()
 
-            all_gen_loss += g_loss.cpu().item()
+            all_gen_loss += g_loss.detach().cpu().item()
 
     all_gen_loss /= len(dataloader)
     all_dis_loss /= len(dataloader)

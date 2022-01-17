@@ -1,11 +1,14 @@
 import os
 import cv2
+from random import random
 
+import torch
 from torch.utils.data import Dataset
 from torchvision.transforms import functional as F
 
 import numpy as np
-from constant import dark_threshold
+from constant import *
+from common import get_square, get_noise
 
 
 class InpaitingDataset(Dataset):
@@ -50,14 +53,12 @@ class InpaitingDataset(Dataset):
 
 
 class AFHQDataset(Dataset):
-    def __init__(self, root='data/afhq/train', image_size=(512, 512)):
+    def __init__(self, root='data/afhq/train'):
         self.root = root
         self.list_of_data = []
 
         for file in os.listdir(self.root):
-            self.list_of_data += [file + '\\' + x for x in os.listdir(os.path.join(self.root, file))]
-
-        self.image_size = image_size
+            self.list_of_data += [os.path.join(file, x) for x in os.listdir(os.path.join(self.root, file))]
 
     def __len__(self):
         return len(self.list_of_data)
@@ -65,11 +66,15 @@ class AFHQDataset(Dataset):
     def __getitem__(self, item):
         name = self.list_of_data[item]
         path = os.path.join(self.root, name)
+        target = cv2.imread(path)
+        target = cv2.cvtColor(target, cv2.COLOR_BGR2RGB)
+        target = cv2.resize(target, (IMAGE_SIZE, IMAGE_SIZE))
 
-        img = cv2.imread(path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = cv2.resize(img, self.image_size)
+        target = F.to_tensor(target)
 
-        img = F.to_tensor(img)
+        mask = get_square() if random() < SQUARE_PART else get_noise()
 
-        return img
+        img = target * mask
+        mask.unsqueeze_(0)
+        mask = mask.to(torch.float32)
+        return img, target, mask
