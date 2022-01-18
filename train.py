@@ -45,7 +45,6 @@ def main(epoch):
             with torch.no_grad():
                 for _, (imgs, targets, masks) in enumerate(test_loader):
                     optim_gen.zero_grad()
-                    batch_size = len(imgs)
 
                     targets = targets.cuda()
 

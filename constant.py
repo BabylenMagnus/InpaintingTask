@@ -7,5 +7,6 @@ steps_generator_train = 15
 mse_alpha = 1
 MASK_PERCENT = 0
 SQUARE_PART = 0.7
+NUM_SQARES = 8
 
 IMAGE_SIZE = 256
