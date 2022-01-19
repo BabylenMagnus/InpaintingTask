@@ -17,11 +17,11 @@ train_data = AFHQDataset("data/afhq/train")
 test_data = AFHQDataset("data/afhq/val")
 
 train_loader = DataLoader(
-    train_data, batch_size=18, shuffle=True, num_workers=12
+    train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=12
 )
 
 test_loader = DataLoader(
-    test_data, batch_size=18, num_workers=12
+    test_data, batch_size=BATCH_SIZE, num_workers=12
 )
 
 generator = get_generator().cuda()
@@ -40,7 +40,7 @@ def main(epoch):
         )
         print(f"epoch: {i}; train generator loss: {round(gen_loss, 4)}; train discriminator loss: {round(dis_loss, 4)}")
 
-        if not i % 20:
+        if not i % 2:
             test_gen_loss, test_dis_loss = 0, 0
             with torch.no_grad():
                 for _, (imgs, targets, masks) in enumerate(test_loader):
@@ -76,7 +76,7 @@ def main(epoch):
                 f"{round(test_dis_loss, 4)}"
             )
 
-        if not i % 50:
+        if not i % 2:
             gen_path = f'wgen_{time}_{i}.pt'
             dis_name = f'wdis_{time}_{i}.pt'
 
