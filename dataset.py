@@ -1,6 +1,5 @@
 import os
 import cv2
-from random import random
 
 import torch
 from torch.utils.data import Dataset
@@ -8,7 +7,7 @@ from torchvision.transforms import functional as F
 
 import numpy as np
 from constant import *
-from common import get_square, get_noise, get_multisquare
+from common import get_mask
 
 
 class InpaitingDataset(Dataset):
@@ -72,8 +71,7 @@ class AFHQDataset(Dataset):
 
         target = F.to_tensor(target)
 
-        mask = (get_square() if random() < .5 else get_multisquare()) \
-            if random() < SQUARE_PART else get_noise()
+        mask = get_mask()
 
         img = target * mask
         mask.unsqueeze_(0)
