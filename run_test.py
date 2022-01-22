@@ -30,6 +30,14 @@ for i in os.listdir(args.test_folder_path):
 
     mask = get_mask()
     img = img * mask
+
+    img_ = img.numpy()
+    img_ = img_ * 256
+    img_ = np.int16(img_)
+    img_ = np.transpose(img_, (1, 2, 0))
+    img_ = img_[:, :, [2, 1, 0]]
+    cv2.imwrite(os.path.join(args.output_folder_path, "t" + i), img_)
+
     mask.unsqueeze_(0)
 
     inp_tensor = torch.cat((img, mask), dim=0).unsqueeze(0).cuda()

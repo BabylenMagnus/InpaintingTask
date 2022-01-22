@@ -99,8 +99,8 @@ class SpectralDownLayer(torch.nn.Module):
             nn.LeakyReLU(0.2, inplace=True)
         )
 
-    def forward(self, input):
-        x = self.conv2d(input)
+    def forward(self, x):
+        x = self.conv2d(x)
         return x
 
 
@@ -122,8 +122,8 @@ class InpaintingDiscriminator(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, input):
-        x = self.discriminator_net(input)
+    def forward(self, x):
+        x = self.discriminator_net(x)
         x = x.view((x.size(0), -1))
         x = self.linear(x)
         return x

@@ -4,7 +4,7 @@ from model import InpaitingModel, InpaintingDiscriminator
 from constant import *
 
 
-def compute_gp(netD, real_data, fake_data):
+def compute_gp(discriminator, real_data, fake_data):
     batch_size = real_data.size(0)
     # Sample Epsilon from uniform distribution
     eps = torch.rand(batch_size, 1, 1, 1).to(real_data.device)
@@ -14,7 +14,7 @@ def compute_gp(netD, real_data, fake_data):
     interpolation = eps * real_data + (1 - eps) * fake_data
 
     # get logits for interpolated images
-    interp_logits = netD(interpolation)
+    interp_logits = discriminator(interpolation)
     grad_outputs = torch.ones_like(interp_logits)
 
     # Compute Gradients
@@ -40,7 +40,7 @@ def train_one_epoch(
 
     all_gen_loss, all_dis_loss = 0, 0
 
-    mse_loss = torch.nn.MSELoss()
+    mae_loss = torch.nn.L1Loss()
 
     for i, (imgs, targets, masks) in enumerate(dataloader):
         targets = targets.cuda()
@@ -73,7 +73,7 @@ def train_one_epoch(
 
             gen_img = generator(inp_tensor)
             fake_validity = discriminator(gen_img).reshape(-1)
-            g_loss = -torch.mean(fake_validity) + mse_loss(gen_img, targets) * mse_alpha
+            g_loss = -torch.mean(fake_validity) + mae_loss(gen_img, targets) * MAE_ALPHA
 
             g_loss.backward()
             optim_gen.step()

@@ -5,7 +5,7 @@ from constant import IMAGE_SIZE, MASK_PERCENT, NUM_SQARES, SQUARE_PART
 
 def get_square():
     unit = int(IMAGE_SIZE * MASK_PERCENT)
-    x, y = randint(0, IMAGE_SIZE - unit),randint(0, IMAGE_SIZE - unit)
+    x, y = randint(0, IMAGE_SIZE - unit), randint(0, IMAGE_SIZE - unit)
     mask = torch.ones(IMAGE_SIZE, IMAGE_SIZE)
     mask[y: y + unit, x: x + unit] = 0
     return mask

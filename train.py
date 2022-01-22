@@ -30,8 +30,6 @@ discriminator = get_discriminator().cuda()
 optim_gen = Adam(generator.parameters(), lr=LR, betas=(0.5, 0.9))
 optim_dis = Adam(discriminator.parameters(), lr=LR, betas=(0.5, 0.9))
 
-epoch = int(sys.argv[1])
-
 
 def main(epoch):
     for i in range(1, epoch + 1):
@@ -85,4 +83,4 @@ def main(epoch):
 
 
 if __name__ == '__main__':
-    main(epoch)
+    main(int(sys.argv[1]))
