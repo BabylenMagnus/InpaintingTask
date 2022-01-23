@@ -38,15 +38,18 @@ def main(epoch):
         )
         print(f"epoch: {i}; train generator loss: {round(gen_loss, 4)}; train discriminator loss: {round(dis_loss, 4)}")
 
-        if not i % 2:
+        if not i % TEST_RATE:
             test_gen_loss, test_dis_loss = 0, 0
             with torch.no_grad():
-                for _, (imgs, targets, masks) in enumerate(test_loader):
+                for imgs, targets, masks in test_loader:
                     optim_gen.zero_grad()
 
                     targets = targets.cuda()
 
-                    inp_tensor = torch.cat((imgs, masks), dim=1).cuda()
+                    mask3 = torch.cat((masks, masks, masks), 1)
+                    rand = torch.randn(mask3.shape)
+                    rand = rand * (1 - mask3)
+                    inp_tensor = torch.cat((imgs, masks, rand), dim=1).cuda()
 
                     optim_dis.zero_grad()
                     gen_img = generator(inp_tensor)
@@ -74,7 +77,7 @@ def main(epoch):
                 f"{round(test_dis_loss, 4)}"
             )
 
-        if not i % 2:
+        if not i % SAVE_RATE:
             gen_path = f'wgen_{time}_{i}.pt'
             dis_name = f'wdis_{time}_{i}.pt'
 

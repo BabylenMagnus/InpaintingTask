@@ -39,11 +39,14 @@ for i in os.listdir(args.test_folder_path):
     cv2.imwrite(os.path.join(args.output_folder_path, "t" + i), img_)
 
     mask.unsqueeze_(0)
+    mask3 = torch.cat((mask, mask, mask), 0)
+    rand = torch.randn(mask3.shape)
+    rand = rand * (1 - mask3)
+    inp_tensor = torch.cat((img, mask, rand), dim=0).unsqueeze(0).cuda()
+    gen_img = generator(inp_tensor)[0].detach().cpu()
+    img = gen_img * (1 - mask3) + img
 
-    inp_tensor = torch.cat((img, mask), dim=0).unsqueeze(0).cuda()
-    img = generator(inp_tensor)[0]
-
-    img = img.detach().cpu().numpy()
+    img = img.numpy()
     img = np.transpose(img, (1, 2, 0))
 
     img[img < 0] = 0

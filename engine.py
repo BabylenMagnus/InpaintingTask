@@ -44,13 +44,21 @@ def train_one_epoch(
 
     for i, (imgs, targets, masks) in enumerate(dataloader):
         targets = targets.cuda()
-        inp_tensor = torch.cat((imgs, masks), dim=1).cuda()
+        imgs = imgs.cuda()
+        masks = masks.cuda()
+
+        mask3 = torch.cat((masks, masks, masks), 1)
+        rand = torch.randn(mask3.shape).cuda()
+        rand = rand * (1 - mask3)
+
+        inp_tensor = torch.cat((imgs, masks, rand), dim=1)
 
         # ---------------------
         #  Train Discriminator
         # ---------------------
         optim_dis.zero_grad()
         gen_img = generator(inp_tensor)
+        gen_img = gen_img * (1 - mask3) + imgs
 
         real_validity = discriminator(targets).reshape(-1)
         fake_validity = discriminator(gen_img).reshape(-1)

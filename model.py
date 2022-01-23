@@ -49,7 +49,7 @@ class InpaitingModel(nn.Module):
     def __init__(self):
         super(InpaitingModel, self).__init__()
 
-        self.conv1 = ConvBlock(4, 32).cuda()
+        self.conv1 = ConvBlock(7, 32).cuda()
         self.conv2 = ConvBlock(128, 32, pool=True).cuda()
         self.conv3 = ConvBlock(128, 64, pool=True).cuda()
         self.conv4 = ConvBlock(256, 128, pool=True).cuda()
@@ -61,7 +61,7 @@ class InpaitingModel(nn.Module):
         self.dec4 = DeconvBlock(256, 32).cuda()
 
         self.out1 = nn.Sequential(
-            nn.ConvTranspose2d(132, 8, kernel_size=(3, 3), padding=(1, 1)),
+            nn.ConvTranspose2d(135, 8, kernel_size=(3, 3), padding=(1, 1)),
             nn.LeakyReLU()
         )
 
