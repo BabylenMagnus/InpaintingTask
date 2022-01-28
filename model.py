@@ -53,12 +53,10 @@ class InpaitingModel(nn.Module):
         self.conv2 = ConvBlock(128, 32, pool=True).cuda()
         self.conv3 = ConvBlock(128, 64, pool=True).cuda()
         self.conv4 = ConvBlock(256, 128, pool=True).cuda()
-        self.conv5 = ConvBlock(512, 128, pool=True).cuda()
 
-        self.dec1 = DeconvBlock(1024, 64).cuda()
-        self.dec2 = DeconvBlock(512, 32).cuda()
+        self.dec1 = DeconvBlock(768, 64).cuda()
+        self.dec2 = DeconvBlock(384, 32).cuda()
         self.dec3 = DeconvBlock(256, 32).cuda()
-        self.dec4 = DeconvBlock(256, 32).cuda()
 
         self.out1 = nn.Sequential(
             nn.ConvTranspose2d(135, 8, kernel_size=(3, 3), padding=(1, 1)),
@@ -75,14 +73,12 @@ class InpaitingModel(nn.Module):
         x2 = self.conv2(x1)
         x3 = self.conv3(x2)
         x4 = self.conv4(x3)
-        x5 = self.conv5(x4)
 
-        x6 = self.dec1(x5, x4)
-        x7 = self.dec2(x6, x3)
-        x8 = self.dec3(x7, x2)
-        x9 = self.dec4(x8, x1)
+        x5 = self.dec1(x4, x3)
+        x6 = self.dec2(x5, x2)
+        x7 = self.dec3(x6, x1)
 
-        x = torch.cat((x9, x), 1)
+        x = torch.cat((x7, x), 1)
         x = self.out1(x)
         x = self.out2(x)
 
@@ -113,7 +109,6 @@ class InpaintingDiscriminator(nn.Module):
             SpectralDownLayer(cnum, 2 * cnum),
             SpectralDownLayer(2 * cnum, 4 * cnum),
             SpectralDownLayer(4 * cnum, 8 * cnum),
-            SpectralDownLayer(8 * cnum, 8 * cnum),
             SpectralDownLayer(8 * cnum, 8 * cnum),
             SpectralDownLayer(8 * cnum, 8 * cnum)
         )

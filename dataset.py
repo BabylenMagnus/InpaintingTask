@@ -54,10 +54,11 @@ class InpaitingDataset(Dataset):
 class AFHQDataset(Dataset):
     def __init__(self, root='data/afhq/train'):
         self.root = root
-        self.list_of_data = []
 
-        for file in os.listdir(self.root):
-            self.list_of_data += [os.path.join(file, x) for x in os.listdir(os.path.join(self.root, file))]
+        self.list_of_data = os.listdir(self.root)
+
+        # for file in os.listdir(self.root):
+        #     self.list_of_data += [os.path.join(file, x) for x in os.listdir(os.path.join(self.root, file))]
 
     def __len__(self):
         return len(self.list_of_data)

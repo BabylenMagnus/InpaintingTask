@@ -58,7 +58,7 @@ def train_one_epoch(
         # ---------------------
         optim_dis.zero_grad()
         gen_img = generator(inp_tensor)
-        gen_img = gen_img * (1 - mask3) + imgs
+        # gen_img = gen_img * (1 - mask3) + imgs
 
         real_validity = discriminator(targets).reshape(-1)
         fake_validity = discriminator(gen_img).reshape(-1)

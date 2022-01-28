@@ -13,8 +13,8 @@ from constant import *
 
 time = datetime.now().strftime("%d_%H_%m")
 
-train_data = AFHQDataset("data/afhq/train")
-test_data = AFHQDataset("data/afhq/val")
+train_data = AFHQDataset("data/afhq/train/cat")
+test_data = AFHQDataset("data/afhq/val/cat")
 
 train_loader = DataLoader(
     train_data, batch_size=BATCH_SIZE, shuffle=True, num_workers=12
