@@ -27,8 +27,8 @@ test_loader = DataLoader(
 generator = get_generator().cuda()
 discriminator = get_discriminator().cuda()
 
-optim_gen = Adam(generator.parameters(), lr=LR, betas=(0.5, 0.9))
-optim_dis = Adam(discriminator.parameters(), lr=LR, betas=(0.5, 0.9))
+optim_gen = Adam(generator.parameters(), lr=LR)
+optim_dis = Adam(discriminator.parameters(), lr=LR)
 
 
 def main(epoch):
