@@ -54,11 +54,7 @@ class InpaitingDataset(Dataset):
 class AFHQDataset(Dataset):
     def __init__(self, root='data/afhq/train'):
         self.root = root
-
         self.list_of_data = os.listdir(self.root)
-
-        # for file in os.listdir(self.root):
-        #     self.list_of_data += [os.path.join(file, x) for x in os.listdir(os.path.join(self.root, file))]
 
     def __len__(self):
         return len(self.list_of_data)
@@ -66,15 +62,19 @@ class AFHQDataset(Dataset):
     def __getitem__(self, item):
         name = self.list_of_data[item]
         path = os.path.join(self.root, name)
-        target = cv2.imread(path)
-        target = cv2.cvtColor(target, cv2.COLOR_BGR2RGB)
-        target = cv2.resize(target, (IMAGE_SIZE, IMAGE_SIZE))
+        x = cv2.imread(path)
+        x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
+        x = cv2.resize(x, (IMAGE_SIZE, IMAGE_SIZE))
 
-        target = F.to_tensor(target)
+        x = F.to_tensor(x)
 
         mask = get_mask()
 
-        img = target * mask
-        mask.unsqueeze_(0)
+        new_x = x * mask
+        mask3 = mask.repeat(3, 1, 1)
+        rand_z = torch.distributions.normal.Normal(0, 0.1).sample(mask3.shape)
+        rand_z = (1 - mask3) * rand_z
+
         mask = mask.to(torch.float32)
-        return img, target, mask
+
+        return x, new_x, mask, rand_z

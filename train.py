@@ -41,15 +41,12 @@ def main(epoch):
         if not i % TEST_RATE:
             test_gen_loss, test_dis_loss = 0, 0
             with torch.no_grad():
-                for imgs, targets, masks in test_loader:
+                for x, new_x, mask, rand_z in test_loader:
                     optim_gen.zero_grad()
 
                     targets = targets.cuda()
 
-                    mask3 = torch.cat((masks, masks, masks), 1)
-                    rand = torch.randn(mask3.shape)
-                    rand = rand * (1 - mask3)
-                    inp_tensor = torch.cat((imgs, masks, rand), dim=1).cuda()
+                    inp_tensor = torch.cat((new_x, mask, rand_z), dim=1).cuda()
 
                     optim_dis.zero_grad()
                     gen_img = generator(inp_tensor)

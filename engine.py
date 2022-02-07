@@ -42,29 +42,24 @@ def train_one_epoch(
 
     mae_loss = torch.nn.L1Loss()
 
-    for i, (imgs, targets, masks) in enumerate(dataloader):
-        targets = targets.cuda()
-        imgs = imgs.cuda()
-        masks = masks.cuda()
+    for i, (x, new_x, mask, rand_z) in enumerate(dataloader):
+        x = x.cuda().to(torch.float32)
+        new_x = new_x.cuda()
+        mask = mask.cuda()
+        rand_z = rand_z.cuda()
 
-        mask3 = torch.cat((masks, masks, masks), 1)
-        rand = torch.randn(mask3.shape).cuda()
-        rand = rand * (1 - mask3)
-
-        inp_tensor = torch.cat((imgs, masks, rand), dim=1)
+        inp_tensor = torch.cat((new_x, mask, rand_z), dim=1)
 
         # ---------------------
         #  Train Discriminator
         # ---------------------
         optim_dis.zero_grad()
         gen_img = generator(inp_tensor)
-        # gen_img = gen_img * (1 - mask3) + imgs
-
-        real_validity = discriminator(targets).reshape(-1)
+        real_validity = discriminator(x).reshape(-1)
         fake_validity = discriminator(gen_img).reshape(-1)
 
         # Gradient Penalty
-        gp = compute_gp(discriminator, targets, gen_img)
+        gp = compute_gp(discriminator, x, gen_img)
 
         # Wasserstein loss with penalty
         d_loss = torch.mean(fake_validity) - torch.mean(real_validity) + penalty_lambda * gp
@@ -81,7 +76,7 @@ def train_one_epoch(
 
             gen_img = generator(inp_tensor)
             fake_validity = discriminator(gen_img).reshape(-1)
-            g_loss = -torch.mean(fake_validity) + mae_loss(gen_img, targets) * MAE_ALPHA
+            g_loss = -torch.mean(fake_validity) + mae_loss(gen_img, x) * MAE_ALPHA
 
             g_loss.backward()
             optim_gen.step()
