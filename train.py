@@ -44,14 +44,14 @@ def main(epoch):
                 for x, new_x, mask, rand_z in test_loader:
                     optim_gen.zero_grad()
 
-                    targets = targets.cuda()
+                    x = x.cuda()
 
                     inp_tensor = torch.cat((new_x, mask, rand_z), dim=1).cuda()
 
                     optim_dis.zero_grad()
                     gen_img = generator(inp_tensor)
 
-                    real_validity = discriminator(targets).reshape(-1)
+                    real_validity = discriminator(x).reshape(-1)
                     fake_validity = discriminator(gen_img).reshape(-1)
 
                     # Wasserstein loss
