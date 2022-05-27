@@ -6,3 +6,10 @@ data
 *.zip
 *.ipynb
 weights
+big-lama/models/*
+LaMa_test_images/*
+fix_image/images/*
+models/best.ckpt
+ade20k/ade20k-resnet50dilated-ppm_deepsup/encoder_epoch_20.pth
+old_model
+old_weight/*

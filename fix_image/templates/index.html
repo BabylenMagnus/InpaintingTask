@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Fix Image</title>
+    </head>
+
+    <body>
+        {% if error %}
+            <p class=error><center><strong>Пожалуйста загрузите картинку</strong></center>
+        {% endif %}
+
+        <div class="container">
+            <form action="/" method=POST enctype="multipart/form-data">
+                <input type="file" name="file" />
+               <input type="submit" value="Загрузить" />
+            </form>
+        </div>
+
+        {% if load %}
+            <canvas1 width={{w}} height={{h}}>
+            </canvas1>
+            <canvas width={{w}} height={{h}}>
+            </canvas>
+
+            <div id="con" style="display:none">{{img_ext}}</div>
+            <div id="con2" style="display:none">{{image}}</div>
+            <form action="" method="post">
+                <button class="button">Finish</button>
+            </form>
+            <script>
+                var canvas = document.querySelector('canvas')
+                var ctx = canvas.getContext('2d')
+
+                var canvas1 = document.querySelector('canvas1')
+                var ctx1 = canvas.getContext('2d')
+
+                ctx.strokeStyle = 'red';
+
+                var img = new Image();
+                img.src = "data:image/" + document.getElementById("con").innerHTML +
+                    ";charset=utf-8;base64," + document.getElementById("con2").innerHTML;
+                img.onload = function() {
+                  ctx1.drawImage(img, 0, 0);
+                };
+                img.crossOrigin = 'Anonymous';
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                ctx.lineWidth = 15
+                var button = document.querySelector('button')
+                var mouse = {x: 0, y: 0}
+
+                canvas.addEventListener('mousemove', function(e) {
+                  mouse.x = e.pageX - this.offsetLeft
+                  mouse.y = e.pageY - this.offsetTop
+                })
+                canvas.onmousedown = ()=>{
+                  ctx.beginPath()
+                  ctx.moveTo(mouse.x, mouse.y)
+                  canvas.addEventListener('mousemove', onPaint)
+                }
+                canvas.onmouseup = ()=>{
+                  canvas.removeEventListener('mousemove', onPaint)
+                }
+                var onPaint = ()=>{
+                  ctx.lineTo(mouse.x, mouse.y)
+                  ctx.stroke()
+                }
+
+                var data = new Promise(resolve=>{
+                  button.onclick = ()=>{
+                    canvas.toDataURL('image/png')
+                  }
+                })
+
+                $.ajax({
+                  type: "POST",
+                  url: "http://url/hook",
+                  data:{
+                    imageBase64: dataURL
+                  }
+                }).done(function() {
+                  console.log('sent');
+                });
+            </script>
+
+        {% endif %}
+
+    </body>
+</html>

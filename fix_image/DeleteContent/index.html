@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <title>Рисовалка</title>
+  <link rel="stylesheet" href="style.css" />
+<script src="./script.js"></script>
+</head>
+<body>
+<div class="Content">
+  <div class="Toolbar">
+          Толщина<br>
+          <img src="http://professorweb.ru/downloads/pen_thin.gif" alt="Тонкая кисть" class='imgthickness'>
+          <img src="http://professorweb.ru/downloads/pen_medium.gif" alt="Нормальная кисть" class='imgthickness'>
+          <img src="http://professorweb.ru/downloads/pen_thick.gif" alt="Толстая кисть" class='imgthickness'>
+  </div>
+  <div class="paint-control">
+	<a href="#" id="undo">Отменить</a>
+	<a href="#" id="clear">Очистить</a>
+</div>
+
+
+	<div class="paint-canvas">
+		<canvas id="canvas" width="1920" height="1080"></canvas>
+		<input id="canvas_img" type="hidden" name="canvas_img" value="">
+	</div>
+
+<button id="ButDownload">Скачать</button>
+<img id="savedImageCopy">
+  </div>
+
+
+</body>
+</html>

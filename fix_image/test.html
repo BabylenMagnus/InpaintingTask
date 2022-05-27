@@ -1,0 +1,67 @@
+<style>
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+</style>
+<canvas1 width=400 height=200>
+</canvas1>
+<canvas width=400 height=200>
+</canvas>
+
+<button class="button">Finish</button>
+<script>
+var canvas = document.querySelector('canvas')
+var ctx = canvas.getContext('2d')
+
+var canvas1 = document.querySelector('canvas1')
+var ctx1 = canvas.getContext('2d')
+
+
+ctx.strokeStyle = 'red';
+
+var img = new Image();
+img.src = "DeleteContent/face.jpg";
+console.log(img)
+img.onload = function() {
+  ctx1.drawImage(img, 0, 0);
+};
+img.crossOrigin = 'Anonymous';
+
+ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+ctx.lineWidth = 400
+var button = document.querySelector('button')
+var mouse = {x: 0, y: 0}
+
+canvas.addEventListener('mousemove', function(e) {
+  mouse.x = e.pageX - this.offsetLeft
+  mouse.y = e.pageY - this.offsetTop
+})
+canvas.onmousedown = ()=>{
+  ctx.beginPath()
+  ctx.moveTo(mouse.x, mouse.y)
+  canvas.addEventListener('mousemove', onPaint)
+}
+canvas.onmouseup = ()=>{
+  canvas.removeEventListener('mousemove', onPaint)
+}
+var onPaint = ()=>{
+  ctx.lineTo(mouse.x, mouse.y)
+  ctx.stroke()
+}
+
+var data = new Promise(resolve=>{
+  button.onclick = ()=>{
+    resolve(canvas.toDataURL('image/png'))
+  }
+})
+</script>
