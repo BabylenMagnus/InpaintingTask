@@ -29,7 +29,6 @@ from torch.utils.data._utils.collate import default_collate
 
 from saicinpainting.training.data.datasets import make_default_val_dataset
 from saicinpainting.utils import register_debug_signal_handlers
-from saicinpainting.training.trainers.default import BaseModel
 from saicinpainting.training.trainers import load_checkpoint
 
 LOGGER = logging.getLogger(__name__)
